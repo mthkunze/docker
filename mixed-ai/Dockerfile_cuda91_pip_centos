@@ -1,0 +1,41 @@
+FROM nvidia/cuda:9.1-devel-centos7
+
+RUN yum -y install epel-release && yum -y update && yum -y install python2-devel python-dev python-pip openblas-devel blas blas-devel && yum clean all
+ 
+RUN pip install virtualenv==15.1.0
+ 
+RUN virtualenv --system-site-packages /venv-cpu
+RUN virtualenv --system-site-packages /venv-gpu
+ 
+RUN chmod +x /venv-cpu/bin/activate
+RUN chmod +x /venv-gpu/bin/activate
+ 
+COPY ./requirements.txt /tmp/requirements.txt
+ 
+RUN /venv-cpu/bin/pip install -r /tmp/requirements.txt
+RUN /venv-gpu/bin/pip install -r /tmp/requirements.txt
+ 
+ENV MY_TF_VER 1.6.0
+#RUN /venv-gpu/bin/pip install https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-$MY_TF_VER-cp36-cp36m-linux_x86_64.whl
+#RUN /venv-cpu/bin/pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-$MY_TF_VER-cp36-cp36m-linux_x86_64.whl
+
+RUN /venv-gpu/bin/pip install https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-$MY_TF_VER-cp27-none-linux_x86_64.whl
+RUN /venv-cpu/bin/pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-$MY_TF_VER-cp27-none-linux_x86_64.whl
+
+RUN ["mkdir", "notebooks"]
+
+COPY jupyter_notebook_config.py /root/.jupyter/
+COPY run_jupyter.sh /
+
+# Jupyter and Tensorboard ports
+EXPOSE 8888 6006
+
+# Store notebooks in this mounted directory
+VOLUME /srv/docker/godeep_anaconda
+
+CMD ["/run_jupyter.sh"]
+
+# run unit tests
+#RUN python -c "import numpy; numpy.test(verbose=2)"
+#RUN python -c "import scipy; scipy.test(verbose=2)"
+

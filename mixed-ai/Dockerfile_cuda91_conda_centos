@@ -1,0 +1,31 @@
+FROM nvidia/cuda:9.1-devel-centos7
+
+RUN yum -y install epel-release && yum -y update && yum -y install bzip2 && yum clean all
+
+RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && curl https://repo.continuum.io/miniconda/Miniconda3-4.5.1-Linux-x86_64.sh >> ~/miniconda.sh && /bin/bash ~/miniconda.sh -b -p /opt/conda && rm ~/miniconda.sh
+ 
+RUN /opt/conda/bin/conda install -y python=2.7
+
+RUN /opt/conda/bin/conda install -y -c auto tensorflow-gpu theano keras keras-gpu openblas odo SqlAlchemy ibm_db_sa pytest-astropy navigator-updater statsmodels qtconsole nbconvert et_xmlfile xlwt astropy wrapt blaze lxml matplotlib pandas psycopg2 scikit-learn more-itertools scipy setuptools
+
+RUN /opt/conda/bin/conda upgrade --all
+
+RUN /opt/conda/bin/conda install -y -c conda-forge xgboost --verbose
+
+RUN ["mkdir", "notebooks"]
+
+COPY jupyter_notebook_config.py /root/.jupyter/
+COPY run_jupyter.sh /
+
+# Jupyter and Tensorboard ports
+EXPOSE 8888 6006
+
+# Store notebooks in this mounted directory
+VOLUME /srv/docker/godeep_anaconda
+
+CMD ["/run_jupyter.sh"]
+
+# run unit tests
+#RUN python -c "import numpy; numpy.test(verbose=2)"
+#RUN python -c "import scipy; scipy.test(verbose=2)"
+

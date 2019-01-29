@@ -1,0 +1,16 @@
+Pillow
+h5py
+ipykernel
+jupyter
+keras
+theano
+jupyter
+matplotlib
+numpy
+pandas
+scipy
+sklearn
+more-itertools
+setuptools
+ibm_db_sa
+SqlAlchemy

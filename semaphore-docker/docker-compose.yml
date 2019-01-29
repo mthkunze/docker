@@ -1,0 +1,22 @@
+mysql:
+  image: mysql
+  environment:
+    MYSQL_DATABASE: 'semaphore'
+    MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+  hostname: mysql
+  expose:
+    - 3306
+  volumes:
+    - /opt/data/mysql/:/var/lib/mysql
+
+semaphore:
+  #build: .
+  image: dsmorse/semaphore-docker:latest
+  expose:
+    - 3000
+  ports:
+    - 8080:3000
+  links:
+    - mysql:mysql
+#  volumes:
+#    - /opt/data/semaphore/:/opt/data/semaphore

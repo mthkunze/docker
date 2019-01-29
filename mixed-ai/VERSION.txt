@@ -1,0 +1,7 @@
+mthkunze/cuda91_pip_centos:1.1
+
+without xgboost openblas
+
+mthkunze/cuda91_conda_centos:1.0
+
+without xgboost

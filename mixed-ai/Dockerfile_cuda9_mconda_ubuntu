@@ -1,0 +1,28 @@
+FROM nvidia/cuda:9.0-base-ubuntu16.04
+
+MAINTAINER Martin Kunze <mthkunze@gmail.com>
+
+RUN apt-get update && apt-get install curl bzip2 -y && apt clean all
+
+RUN /bin/sh -c echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && curl https://repo.continuum.io/miniconda/Miniconda3-4.5.1-Linux-x86_64.sh >> ~/miniconda.sh && /bin/bash ~/miniconda.sh -b -p /opt/conda && rm ~/miniconda.sh
+
+RUN apt-get update && apt-get install -y libgtk2.0-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    /opt/conda/bin/conda install jupyter -y && \
+    /opt/conda/bin/conda install -c menpo opencv3 -y && \
+    /opt/conda/bin/conda install conda numpy pandas scikit-learn matplotlib seaborn pyyaml h5py scipy six theano cudatoolkit==9.0 tensorflow-gpu tensorflow-gpu-base tensorflow-tensorboard keras -y && \
+    /opt/conda/bin/conda upgrade --all
+
+RUN ["mkdir", "notebooks"]
+
+COPY jupyter_notebook_config.py /root/.jupyter/
+COPY run_jupyter.sh /
+
+# Jupyter and Tensorboard ports
+EXPOSE 8888 6006
+
+# Store notebooks in this mounted directory
+VOLUME /srv/docker/godeep_anaconda
+
+CMD ["/run_jupyter.sh"]
+
