@@ -9,19 +9,22 @@ RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.n
 # Pick up some dependencies and install cuda
 RUN yum -y update 
 RUN yum -y install dkms
-RUN yum -y install conda cuda wget
+RUN yum -y install conda cuda wget bzip2
 RUN yum clean all
 		   
 
 # Install Anaconda
-
-RUN /usr/bin/wget https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86_64.sh && conda install anaconda=5 && conda install conda
+RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && curl https://repo.continuum.io/miniconda/Miniconda3-4.5.1-Linux-x86_64.sh >> ~/miniconda.sh && /bin/bash ~/miniconda.sh -b -p /opt/conda && rm ~/miniconda.sh
+ 
+#RUN /usr/bin/wget https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86_64.sh && conda install anaconda=5 && conda install conda
 
 # --- DO NOT EDIT OR DELETE BETWEEN THE LINES --- #
 # RUN ln -s -f /usr/bin/python3 /usr/bin/python#
 
 # Install tensorflow
-RUN conda install tensorflow-gpu tensorflow-hub theano keras
+RUN /opt/conda/bin/conda install tensorflow-gpu theano keras
+
+RUN /opt/conda/bin/conda install -c conda-forge tensorflow-hub
 
 # Set up our notebook config.
 COPY jupyter_notebook_config.py /root/.jupyter/
