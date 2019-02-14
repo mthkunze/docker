@@ -1,0 +1,1 @@
+docker run -d --name tensor_cuda100_centos -p 127.0.0.1:6006:6006 -p 127.0.0.1:8888:8888 tensor_cuda100_centos:cpu
