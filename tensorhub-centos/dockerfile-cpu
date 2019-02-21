@@ -24,11 +24,13 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && curl ht
 # Install tensorflow
 RUN /opt/conda/bin/conda install tensorflow theano keras
 
-RUN /opt/conda/bin/conda install -c conda-forge tensorflow-hub jupyterlab
+RUN /opt/conda/bin/conda install -c conda-forge tensorflow-hub jupyterlab nodejs
+
+ENV PATH /opt/conda/bin/:$PATH
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 RUN jupyter serverextension enable --py jupyterlab
 
-ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN jupyter labextension install nbdime-jupyterlab --no-build && \
     jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build && \
     jupyter labextension install jupyterlab_bokeh --no-build && \
