@@ -1,0 +1,180 @@
+version: '3'
+
+services:
+  back:
+    image: dockertaiga/back
+    container_name: taiga-back
+    hostname: back
+    restart: unless-stopped
+    depends_on:
+      - db
+      - events
+    networks:
+      - default
+    volumes:
+      - ./data/media:/taiga-media
+      - ./conf/back:/taiga-conf
+    environment:
+      - TAIGA_HOST=qnap.fritz.box:6666
+      - TAIGA_SCHEME=http
+      - TAIGA_BACK_HOST=back
+      - TAIGA_FRONT_HOST=front
+      - EVENTS_HOST=events
+      - TAIGA_SECRET=secret
+      - ENABLE_SSL='no'
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=taiga
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - RABBIT_HOST=rabbit
+      - RABBIT_USER=taiga
+      - RABBIT_PASSWORD=password
+      - RABBIT_VHOST=qnap.fritz.box
+      - STARTUP_TIMEOUT=15s
+
+  front:
+    image: dockertaiga/front
+    container_name: taiga-front
+    hostname: front
+    restart: unless-stopped
+    networks:
+      - default
+    volumes:
+      - ./conf/front:/taiga-conf
+    environment:
+      - TAIGA_HOST=qnap.fritz.box:6666
+      - TAIGA_SCHEME=http
+      - TAIGA_BACK_HOST=back
+      - TAIGA_FRONT_HOST=front
+      - EVENTS_HOST=events
+      - TAIGA_SECRET=secret
+      - ENABLE_SSL='no'
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=taiga
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - RABBIT_HOST=rabbit
+      - RABBIT_USER=taiga
+      - RABBIT_PASSWORD=password
+      - RABBIT_VHOST=qnap.fritz.box
+      - STARTUP_TIMEOUT=15s
+
+  db:
+    image: postgres:11-alpine
+    container_name: taiga-db
+    hostname: db
+    restart: unless-stopped
+    networks:
+      - default
+    ports:
+      - 5432:5432
+    environment:
+      - TAIGA_HOST=qnap.fritz.box:6666
+      - TAIGA_SCHEME=http
+      - TAIGA_BACK_HOST=back
+      - TAIGA_FRONT_HOST=front
+      - EVENTS_HOST=events
+      - TAIGA_SECRET=secret
+      - ENABLE_SSL='no'
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=taiga
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - RABBIT_HOST=rabbit
+      - RABBIT_USER=taiga
+      - RABBIT_PASSWORD=password
+      - RABBIT_VHOST=qnap.fritz.box
+      - STARTUP_TIMEOUT=15s
+
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+
+  rabbit:
+    image: dockertaiga/rabbit
+    container_name: taiga-rabbit
+    hostname: rabbit
+    restart: unless-stopped
+    networks:
+      - default
+    environment:
+      - TAIGA_HOST=qnap.fritz.box:6666
+      - TAIGA_SCHEME=http
+      - TAIGA_BACK_HOST=back
+      - TAIGA_FRONT_HOST=front
+      - EVENTS_HOST=events
+      - TAIGA_SECRET=secret
+      - ENABLE_SSL='no'
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=taiga
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - RABBIT_HOST=rabbit
+      - RABBIT_USER=taiga
+      - RABBIT_PASSWORD=password
+      - RABBIT_VHOST=qnap.fritz.box
+      - STARTUP_TIMEOUT=15s
+
+  events:
+    image: dockertaiga/events
+    container_name: taiga-events
+    hostname: events
+    restart: unless-stopped
+    depends_on:
+      - rabbit
+    networks:
+      - default
+    environment:
+      - TAIGA_HOST=qnap.fritz.box:6666
+      - TAIGA_SCHEME=http
+      - TAIGA_BACK_HOST=back
+      - TAIGA_FRONT_HOST=front
+      - EVENTS_HOST=events
+      - TAIGA_SECRET=secret
+      - ENABLE_SSL='no'
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=taiga
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - RABBIT_HOST=rabbit
+      - RABBIT_USER=taiga
+      - RABBIT_PASSWORD=password
+      - RABBIT_VHOST=qnap.fritz.box
+      - STARTUP_TIMEOUT=15s
+
+  proxy:
+    image: dockertaiga/proxy
+    container_name: taiga-proxy
+    hostname: taiga
+    restart: unless-stopped
+    depends_on:
+      - back
+      - front
+      - events
+    networks:
+      - default
+    ports:
+      - 8888:80
+      #- 8443:443
+    volumes:
+      #- ./cert:/taiga-cert
+      - ./conf/proxy:/taiga-conf
+    environment:
+      - TAIGA_HOST=qnap.fritz.box:6666
+      - TAIGA_SCHEME=http
+      - TAIGA_BACK_HOST=back
+      - TAIGA_FRONT_HOST=front
+      - EVENTS_HOST=events
+      - TAIGA_SECRET=secret
+      - ENABLE_SSL='no'
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=taiga
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - RABBIT_HOST=rabbit
+      - RABBIT_USER=taiga
+      - RABBIT_PASSWORD=password
+      - RABBIT_VHOST=qnap.fritz.box
+      - STARTUP_TIMEOUT=15s
+
+networks:
+  default:
